@@ -199,24 +199,22 @@ async function main() {
       continue;
     }
 
-    await setTimeout(() => {}, 500);
-
     const card = await getScryfallCard(scryfallLink.href);
 
     if (card) {
       const url = getCardKingdomUrl(card);
-      if (!url) {
-        return;
+      if (url) {
+        await setTimeout(() => {}, 2000);
+        fetchCardKingdomPrice(url).then((rowPrice) => {
+          if (rowPrice) {
+            const rowLink = document.createElement("a");
+            rowLink.className = "currency-eur";
+            rowLink.href = url;
+            rowLink.innerHTML = rowPrice;
+            row.children[2].appendChild(rowLink);
+          }
+        });
       }
-      fetchCardKingdomPrice(url).then((rowPrice) => {
-        if (rowPrice) {
-          const rowLink = document.createElement("a");
-          rowLink.className = "currency-eur";
-          rowLink.href = url;
-          rowLink.innerHTML = rowPrice;
-          row.children[2].appendChild(rowLink);
-        }
-      });
     }
   }
 }
