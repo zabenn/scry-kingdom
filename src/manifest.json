@@ -1,8 +1,12 @@
 {
   "manifest_version": 2,
-  "name": "Firefox Extenion Template",
-  "version": "1.0",
-  "description": "A TypeScript-ready Firefox extension template",
+  "name": "Scry Kingdom",
+  "version": "1.0.0",
+  "description": "Extension that adds Card Kingdom purchase links to Scryfall",
+  "icons": {
+    "48": "icons/icon.svg",
+    "96": "icons/icon.svg"
+  },
   "permissions": [
     "https://api.scryfall.com/*",
     "https://www.cardkingdom.com/*"

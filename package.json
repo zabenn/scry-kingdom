@@ -1,10 +1,9 @@
 {
-  "name": "firefox-extension-template",
+  "name": "scry-kingdom",
   "version": "1.0.0",
-  "main": "index.js",
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "scripts": {
-    "build": "esbuild src/background.ts src/contentScript.ts --bundle --outdir=dist --format=iife && copyfiles -u 1 src/manifest.json src/*.html src/styles/*.css src/*.png dist/"
+    "build": "esbuild src/background.ts src/contentScript.ts --bundle --outdir=dist --format=iife && copyfiles -u 1 src/manifest.json src/icons/*.png src/icons/*.svg dist/"
   },
   "devDependencies": {
     "@types/node-fetch": "^2.6.13",

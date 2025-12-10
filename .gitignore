@@ -1,16 +1,9 @@
 # .gitignore
-
-# Node.js dependencies
-node_modules/
-
-# Build output
-dist/
-
-# TypeScript cache
-*.tsbuildinfo
-
-# Editor-specific files
 .vscode/
-*.sublime*
-*.iml
+*.af~lock*
 *.idea/
+*.iml
+*.sublime*
+*.tsbuildinfo
+dist/
+node_modules/
