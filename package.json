@@ -4,15 +4,19 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "esbuild src/contentScript.ts --bundle --outfile=dist/contentScript.js --format=iife && copyfiles -u 1 src/manifest.json src/*.html src/styles/*.css src/*.png dist/"
+    "build": "esbuild src/background.ts src/contentScript.ts --bundle --outdir=dist --format=iife && copyfiles -u 1 src/manifest.json src/*.html src/styles/*.css src/*.png dist/"
   },
   "devDependencies": {
     "@types/node-fetch": "^2.6.13",
+    "@types/webextension-polyfill": "^0.12.4",
     "copyfiles": "^2.4.1",
     "prettier": "^3.7.4",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "webextension-polyfill": "^0.12.0"
   },
   "dependencies": {
+    "axios": "^1.13.2",
+    "esbuild": "^0.27.1",
     "scryfall-sdk": "^5.0.3"
   }
 }

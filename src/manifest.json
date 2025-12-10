@@ -3,7 +3,14 @@
   "name": "Firefox Extenion Template",
   "version": "1.0",
   "description": "A TypeScript-ready Firefox extension template",
-  "permissions": ["https://api.scryfall.com/*"],
+  "permissions": [
+    "https://api.scryfall.com/*",
+    "https://www.cardkingdom.com/*"
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": true
+  },
   "content_scripts": [
     {
       "matches": ["https://scryfall.com/card/*"],
