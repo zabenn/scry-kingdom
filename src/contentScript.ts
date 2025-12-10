@@ -24,8 +24,27 @@ function createCardKingdomSvg(): SVGSVGElement {
   return svg;
 }
 
-function getCardKingdomUrl(card: Card): string {
+async function getScryfallCard(url: string): Promise<Card | null> {
+  const setCode = url.split("/")[4].trim();
+  const collectorNumber = url.split("/")[5].trim();
+  try {
+    return await Cards.bySet(setCode, collectorNumber);
+  } catch (e) {
+    console.error(
+      "Error fetching card from Scryfall API: ",
+      setCode,
+      collectorNumber
+    );
+    return null;
+  }
+}
+
+function getCardKingdomUrl(card: Card): string | null {
   let setSlug = setCodeToSlug[card.set];
+  if (!setSlug) {
+    console.error("Error converting set slug: ", card.set);
+    return null;
+  }
   if (card.promo_types?.includes("promopack")) {
     setSlug = "promo-pack";
   } else if (card.promo_types?.includes("boosterfun")) {
@@ -52,9 +71,15 @@ async function fetchCardKingdomPrice(url: string): Promise<string | null> {
       response.data!,
       "text/html"
     );
+    const price = cardKingdomDocument.querySelector(".stylePrice")?.innerHTML;
+    if (!price) {
+      console.error("Error fetching Price from Card Kingdom page: ", url);
+    }
     return cardKingdomDocument.querySelector(".stylePrice")?.innerHTML ?? null;
+  } else {
+    console.error("Error fetching card from Card Kingdom page: ", url);
+    return null;
   }
-  return null;
 }
 
 async function main() {
@@ -64,85 +89,68 @@ async function main() {
 
   const li = document.createElement("li");
 
-  let card: Card | null = null;
+  const card = await getScryfallCard(document.URL);
 
-  let nonFoilUrl: string = "";
-  let nonFoilPrice: string | null = null;
+  const finishToUrl: Record<string, string> = {};
+  const finishToPrice: Record<string, string> = {};
 
-  let foilUrl: string = "";
-  let foilPrice: string | null = null;
-
-  try {
-    card = await Cards.bySet(
-      document.URL.split("/")[4],
-      document.URL.split("/")[5]
-    );
-
-    if (card.finishes.includes("nonfoil")) {
-      nonFoilUrl = getCardKingdomUrl(card);
-      nonFoilPrice = await fetchCardKingdomPrice(nonFoilUrl);
-
-      const nonFoilLink = document.createElement("a");
-      nonFoilLink.className = "button-n";
-
-      nonFoilLink.appendChild(createCardKingdomSvg());
-
-      const nonFoilLabel = document.createElement("i");
-      nonFoilLabel.innerHTML = "Buy on Card Kingdom";
-
-      if (nonFoilPrice) {
-        nonFoilLink.href = nonFoilUrl;
-
-        const nonFoilSpan = document.createElement("span");
-        nonFoilSpan.className = "price currency-eur";
-        nonFoilSpan.innerHTML = nonFoilPrice;
-
-        nonFoilLink.appendChild(nonFoilLabel);
-        nonFoilLink.appendChild(nonFoilSpan);
-      } else {
-        nonFoilLink.href = `https://www.cardkingdom.com/catalog/search?&filter[tab]=mtg_card&filter[search]=mtg_advanced&filter[name]=${!card.card_faces ? card.name : card.card_faces[0].name}`;
-
-        nonFoilLink.appendChild(nonFoilLabel);
+  if (card) {
+    for (const finish of card.finishes) {
+      let url = await getCardKingdomUrl(card);
+      let price;
+      if (url) {
+        if (finish === "foil") {
+          url = url.concat("-foil");
+        } else if (finish === "etched") {
+          url = url.concat("-etched-foil");
+        }
+        price = await fetchCardKingdomPrice(url);
       }
 
-      li.appendChild(nonFoilLink);
-    }
-
-    if (card.finishes.includes("foil")) {
-      foilUrl = `${getCardKingdomUrl(card)}-foil`;
-      foilPrice = await fetchCardKingdomPrice(foilUrl);
-
-      const foilLink = document.createElement("a");
-      foilLink.className = "button-n";
-
-      foilLink.appendChild(createCardKingdomSvg());
-
-      const foilLabel = document.createElement("i");
-      foilLabel.innerHTML = "Buy foil on Card Kingdom";
-
-      if (foilPrice) {
-        foilLink.href = foilUrl;
-
-        const foilSpan = document.createElement("span");
-        foilSpan.className = "price currency-eur";
-        foilSpan.innerHTML = `✶ ${foilPrice}`;
-
-        foilLink.appendChild(foilLabel);
-        foilLink.appendChild(foilSpan);
-      } else {
-        foilLink.href = `https://www.cardkingdom.com/catalog/search?filter[tab]=mtg_foil&filter[search]=mtg_advanced&filter[name]=${!card.card_faces ? card.name : card.card_faces[0].name}`;
-
-        foilLink.appendChild(foilLabel);
+      if (!url || !price) {
+        let searchTab = "mtg_card";
+        if (finish !== "nonfoil") {
+          searchTab = "mtg_foil";
+        }
+        let cardName = card.name;
+        if (card.card_faces) {
+          cardName = card.card_faces[0].name;
+        }
+        url = `https://www.cardkingdom.com/catalog/search?filter[tab]=${searchTab}&filter[search]=mtg_advanced&filter[name]=${cardName}`;
       }
 
-      li.appendChild(foilLink);
+      const link = document.createElement("a");
+      link.className = "button-n";
+      link.href = url;
+
+      link.appendChild(createCardKingdomSvg());
+
+      const label = document.createElement("i");
+      if (finish === "nonfoil") {
+        label.innerHTML = "Buy on Card Kingdom";
+      } else {
+        label.innerHTML = `Buy ${finish} on Card Kingdom`;
+      }
+      link.appendChild(label);
+
+      if (price) {
+        const span = document.createElement("span");
+        span.className = "price currency-eur";
+        if (finish === "nonfoil") {
+          span.innerHTML = price;
+        } else {
+          span.innerHTML = `✶ ${price}`;
+        }
+        link.appendChild(span);
+      }
+
+      li.appendChild(link);
+
+      finishToUrl[finish] = url;
+      if (price) {
+        finishToPrice[finish] = price;
+      }
     }
-  } catch (e) {
-    console.error(
-      "Error fetching card from Scryfall: ",
-      document.URL.split("/")[4],
-      document.URL.split("/")[5]
-    );
   }
 
   ul.insertBefore(li, ul.children[1]);
@@ -162,7 +170,9 @@ async function main() {
   tcgTh.insertAdjacentElement("afterend", ckdTh);
 
   for (const row of printsBody.children) {
-    if (row.children[1]) {
+    if (row.innerHTML.includes("View all prints")) {
+      (row.children[0] as HTMLTableCellElement).colSpan = 5;
+    } else {
       row.children[1].insertAdjacentElement(
         "afterend",
         document.createElement("td")
@@ -171,22 +181,19 @@ async function main() {
   }
 
   for (const row of printsBody.children) {
+    if (row.innerHTML.includes("View all prints")) {
+      continue;
+    }
+
     const scryfallLink = row.children[0].children[0] as HTMLAnchorElement;
 
     if (row.classList.contains("current")) {
-      if (nonFoilPrice) {
+      if (Object.keys(finishToPrice).length > 0) {
+        const key = Object.keys(finishToPrice)[0];
         const rowLink = document.createElement("a");
         rowLink.className = "currency-eur";
-        rowLink.href = nonFoilUrl;
-        rowLink.innerHTML = nonFoilPrice;
-
-        row.children[2].appendChild(rowLink);
-      } else if (foilPrice) {
-        const rowLink = document.createElement("a");
-        rowLink.className = "currency-eur";
-        rowLink.href = foilUrl;
-        rowLink.innerHTML = foilPrice;
-
+        rowLink.href = finishToUrl[key];
+        rowLink.innerHTML = finishToPrice[key];
         row.children[2].appendChild(rowLink);
       }
       continue;
@@ -194,30 +201,22 @@ async function main() {
 
     await setTimeout(() => {}, 500);
 
-    try {
-      const card = await Cards.bySet(
-        scryfallLink.href.split("/")[4],
-        scryfallLink.href.split("/")[5]
-      );
+    const card = await getScryfallCard(scryfallLink.href);
 
-      const rowUrl = getCardKingdomUrl(card);
-
-      fetchCardKingdomPrice(rowUrl).then((rowPrice) => {
+    if (card) {
+      const url = getCardKingdomUrl(card);
+      if (!url) {
+        return;
+      }
+      fetchCardKingdomPrice(url).then((rowPrice) => {
         if (rowPrice) {
           const rowLink = document.createElement("a");
           rowLink.className = "currency-eur";
-          rowLink.href = rowUrl;
+          rowLink.href = url;
           rowLink.innerHTML = rowPrice;
-
           row.children[2].appendChild(rowLink);
         }
       });
-    } catch (e) {
-      console.error(
-        "Error fetching card from Scryfall: ",
-        scryfallLink.href.split("/")[4],
-        scryfallLink.href.split("/")[5]
-      );
     }
   }
 }
