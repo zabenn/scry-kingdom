@@ -1,7 +1,7 @@
 <p align="center">
   <img
-    src="https://raw.githubusercontent.com/zabenn/scry-kingdom/src/icons/logo.svg"
-    alt="Scry Kingdom logo" height="200" width="200" />
+    src="https://raw.githubusercontent.com/zabenn/scry-kingdom/main/src/icons/icon.svg"
+    alt="Scry Kingdom icon" height="200" width="200" />
 </p>
 
 # Scry Kingdom
