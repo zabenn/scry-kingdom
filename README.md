@@ -10,9 +10,8 @@ A Firefox/Chrome extension that adds [Card Kingdom](https://www.cardkingdom.com)
 
 ## Features
 
-- Adds "Buy on Card Kingdom" buttons to the stores section on Scryfall card pages.
 - Shows Card Kingdom prices for both regular and foil versions.
-- Displays Card Kingdom prices inline on Scryfall card pages.
+- Shows prices inline in the prints section.
 
 ## Limitations
 
