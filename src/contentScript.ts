@@ -21,7 +21,7 @@ interface CardKingdomCatalog {
 function getSetSlug(scryfallCard: Card): string | null {
   let setSlug = setCodeToSlug[scryfallCard.set];
   if (!setSlug) {
-    console.error("Error converting set code to slug: ", scryfallCard.set);
+    console.warn("Error converting set code to slug: ", scryfallCard.set);
     return null;
   }
   if (scryfallCard.promo_types?.includes("promopack")) {
@@ -43,7 +43,7 @@ function getCardKingdomEntry(
 ): CardKingdomEntry | null {
   const setSlug = getSetSlug(scryfallCard);
   if (!setSlug || !cardKingdomCatalog[setSlug]) {
-    console.error(
+    console.warn(
       "Error finding card in catalog: ",
       setSlug,
       scryfallCard.collector_number,
@@ -64,7 +64,7 @@ function getCardKingdomEntry(
   }
 
   if (!entry) {
-    console.error(
+    console.warn(
       "Error finding card in catalog: ",
       setSlug,
       keysToTry,

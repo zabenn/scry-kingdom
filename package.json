@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "license": "GPL-3.0-only",
   "scripts": {
-    "build": "esbuild src/background.ts src/contentScript.ts --bundle --outdir=dist --format=iife && copyfiles -u 1 src/manifest.json src/index.css src/icons/*.png src/icons/*.svg dist/"
+    "build": "pnpm build:chrome && pnpm build:firefox",
+    "build:chrome": "esbuild src/background.ts src/contentScript.ts --bundle --outdir=dist/chrome --format=iife && copyfiles -u 2 src/chrome/manifest.json dist/chrome/ && copyfiles -u 1 src/index.css src/icons/*.png dist/chrome/",
+    "build:firefox": "esbuild src/background.ts src/contentScript.ts --bundle --outdir=dist/firefox --format=iife && copyfiles -u 2 src/firefox/manifest.json dist/firefox/ && copyfiles -u 1 src/index.css src/icons/*.svg dist/firefox/"
   },
   "devDependencies": {
     "@types/node-fetch": "^2.6.13",
