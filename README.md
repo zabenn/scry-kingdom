@@ -1,6 +1,6 @@
 <p align="center">
   <img
-    src="https://raw.githubusercontent.com/zabenn/scry-kingdom/main/src/icons/icon.svg"
+    src="src/icons/icon.svg"
     alt="Scry Kingdom icon" height="200" width="200" />
 </p>
 
@@ -10,12 +10,29 @@ A Firefox/Chrome extension that adds [Card Kingdom](https://www.cardkingdom.com)
 
 ## Features
 
+<table align="center">
+  <tr>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td><img src="docs/stores_before.png" alt="Stores before" width="300" /></td>
+    <td align="center">➡</td>
+    <td><img src="docs/stores_after.png" alt="Stores after" width="300" /></td>
+  </tr>
+  <tr>
+    <td><img src="docs/prints_before.png" alt="Prints before" width="300" /></td>
+    <td align="center">➡</td>
+    <td><img src="docs/prints_after.png" alt="Prints after" width="300" /></td>
+  </tr>
+</table>
+
 - Shows Card Kingdom prices for both regular and foil versions.
 - Shows prices inline in the prints section.
 
 ## Limitations
 
-- Only finds a direct link and price for about 70% of cards.
+- Finds a direct link around 90% of the time.
 - If the direct link cannot be found, links to a search on Card Kingdom.
-- Doesn't yet work well for basic lands or token cards.
-- The incomplete list of conversions from set codes is the main source of missing links.
+- The incomplete list of conversions from set codes to Card Kingdom URL slugs is the main source of missing links.

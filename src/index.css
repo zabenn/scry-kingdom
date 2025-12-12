@@ -1,0 +1,12 @@
+.button-n.card-kingdom {
+  color: #004285;
+  border-color: #004285;
+}
+
+a.card-kingdom {
+  color: #004285 !important;
+}
+
+a.card-kingdom svg path {
+  fill: #004285 !important;
+}

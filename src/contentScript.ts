@@ -18,25 +18,6 @@ interface CardKingdomCatalog {
   };
 }
 
-async function getScryfallCard(url: string): Promise<Card | null> {
-  const splitUrl = url.trim().split("/");
-  const setCode = splitUrl[4].trim();
-  const collectorNumber = decodeURIComponent(splitUrl[5].trim());
-  try {
-    const scryfallCard = await Cards.bySet(setCode, collectorNumber);
-    if (scryfallCard.games?.includes("paper")) {
-      return scryfallCard;
-    }
-  } catch (e) {
-    console.error(
-      "Error fetching card from Scryfall API: ",
-      setCode,
-      collectorNumber
-    );
-  }
-  return null;
-}
-
 function getSetSlug(scryfallCard: Card): string | null {
   let setSlug = setCodeToSlug[scryfallCard.set];
   if (!setSlug) {
@@ -107,6 +88,7 @@ function createCardKingdomSvg(): SVGSVGElement {
   g.setAttribute("transform", "translate(0 -293.82)");
 
   const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("fill", "#004285");
   path.setAttribute(
     "d",
     "m0 293.82v1.1592h0.52042v2.0158h2.6633v-2.0158h0.52042v-1.1592h-0.57636v1.0908h-0.49196v-1.084h-0.54839v1.084h-0.47074v-1.084h-0.54839v1.084h-0.49196v-1.0908z"
@@ -262,7 +244,7 @@ async function main() {
 
   if (currentCardEntries.length === 0) {
     const linkElement = document.createElement("a");
-    linkElement.className = "button-n";
+    linkElement.className = "button-n card-kingdom";
     linkElement.href = `https://www.cardkingdom.com/catalog/search?filter[search]=mtg_advanced&filter[name]=${encodeURIComponent(cardName)}`;
 
     linkElement.appendChild(createCardKingdomSvg());
@@ -278,7 +260,7 @@ async function main() {
       const url = entry?.url ?? "";
 
       const linkElement = document.createElement("a");
-      linkElement.className = "button-n";
+      linkElement.className = "button-n card-kingdom";
       linkElement.href = url;
 
       linkElement.appendChild(createCardKingdomSvg());
@@ -293,7 +275,7 @@ async function main() {
 
       if (price) {
         const spanElement = document.createElement("span");
-        spanElement.className = "price currency-eur";
+        spanElement.className = "price cardkingdom";
         if (finish === "nonfoil") {
           spanElement.innerHTML = price;
         } else {
@@ -332,7 +314,7 @@ async function main() {
     const { url, price } = entry?.nonfoil ?? entry?.foil ?? entry?.etched ?? {};
     if (url) {
       const rowElementLink = document.createElement("a");
-      rowElementLink.className = "currency-eur";
+      rowElementLink.className = "card-kingdom";
       rowElementLink.href = url;
       rowElementLink.innerHTML = price ?? "";
       rowElement.children[2].appendChild(rowElementLink);
