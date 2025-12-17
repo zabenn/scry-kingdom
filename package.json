@@ -5,7 +5,10 @@
   "scripts": {
     "build": "pnpm build:chrome && pnpm build:firefox",
     "build:chrome": "esbuild src/background.ts src/contentScript.ts --bundle --outdir=dist/chrome --format=iife && copyfiles -u 2 src/chrome/manifest.json dist/chrome/ && copyfiles -u 1 src/index.css src/icons/*.png dist/chrome/",
-    "build:firefox": "esbuild src/background.ts src/contentScript.ts --bundle --outdir=dist/firefox --format=iife && copyfiles -u 2 src/firefox/manifest.json dist/firefox/ && copyfiles -u 1 src/index.css src/icons/*.svg dist/firefox/"
+    "build:firefox": "esbuild src/background.ts src/contentScript.ts --bundle --outdir=dist/firefox --format=iife && copyfiles -u 2 src/firefox/manifest.json dist/firefox/ && copyfiles -u 1 src/index.css src/icons/*.svg dist/firefox/",
+    "zip": "pnpm zip:chrome && pnpm zip:firefox",
+    "zip:chrome": "pnpm build:chrome && cd dist/chrome && bestzip ../scry-kingdom-chrome.zip *",
+    "zip:firefox": "pnpm build:firefox && cd dist/firefox && bestzip ../scry-kingdom-firefox.zip *"
   },
   "devDependencies": {
     "@types/node-fetch": "^2.6.13",
@@ -17,6 +20,7 @@
   },
   "dependencies": {
     "axios": "^1.13.2",
+    "bestzip": "^2.2.1",
     "esbuild": "^0.27.1",
     "scryfall-sdk": "^5.0.3"
   }

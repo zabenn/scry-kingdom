@@ -1,6 +1,7 @@
 import browser from "webextension-polyfill";
 
 browser.runtime.onMessage.addListener((message: any) => {
+  console.log("hi");
   if (message.action === "fetch") {
     return fetch(message.url, {
       headers: {

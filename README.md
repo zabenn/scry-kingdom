@@ -1,7 +1,9 @@
 <p align="center">
-  <img
-    src="src/icons/icon.svg"
-    alt="Scry Kingdom icon" height="200" width="200" />
+  <picture>
+    <source srcset="src/icons/icon-white.svg" media="(prefers-color-scheme: dark)">
+    <source srcset="src/icons/icon-black.svg" media="(prefers-color-scheme: light)">
+    <img src="src/icons/icon.svg" alt="Scry Kingdom icon" height="200" width="200" />
+  </picture>
 </p>
 
 # Scry Kingdom

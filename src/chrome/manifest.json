@@ -2,10 +2,11 @@
   "manifest_version": 3,
   "name": "Scry Kingdom",
   "version": "1.0.0",
-  "description": "Extension that adds Card Kingdom purchase links to Scryfall",
+  "description": "Adds Card Kingdom purchase links to Scryfall",
   "icons": {
-    "48": "icons/icon48.png",
-    "96": "icons/icon96.png"
+    "48": "icons/icon-blue48.png",
+    "96": "icons/icon-blue96.png",
+    "128": "icons/icon-blue128.png"
   },
   "permissions": [],
   "host_permissions": [
