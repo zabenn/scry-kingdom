@@ -5,7 +5,7 @@ browser.runtime.onMessage.addListener((message: any) => {
   if (message.action === "fetch") {
     return fetch(message.url, {
       headers: {
-        "User-Agent": "ScryKingdom/1.0.0",
+        "User-Agent": "ScryKingdom/1.0.1",
       },
     })
       .then((response) =>

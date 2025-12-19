@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Scry Kingdom",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Adds Card Kingdom purchase links to Scryfall",
   "icons": {
     "48": "icons/icon-blue48.png",

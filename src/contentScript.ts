@@ -1,5 +1,5 @@
 import { Card, CardIdentifier, Cards, setAgent } from "scryfall-sdk";
-import setCodeToSlug from "./setCodeToSlug";
+import setCodeToSlugs from "./setCodeToSlugs";
 import browElementser from "webextension-polyfill";
 
 type CardKingdomEntry = Partial<
@@ -18,56 +18,81 @@ interface CardKingdomCatalog {
   };
 }
 
-function getSetSlug(scryfallCard: Card): string | null {
-  let setSlug = setCodeToSlug[scryfallCard.set];
-  if (!setSlug) {
-    console.warn("Error converting set code to slug: ", scryfallCard.set);
-    return null;
-  }
+function getSetSlugs(scryfallCard: Card): string[] {
+  const setSlugs: string[] = [];
   if (scryfallCard.promo_types?.includes("promopack")) {
-    setSlug = "promo-pack";
-  } else if (scryfallCard.promo_types?.includes("boxtopper")) {
-    setSlug = setSlug.concat("-box-toppers");
-  } else if (
-    !["spg"].includes(scryfallCard.set) &&
-    scryfallCard.promo_types?.includes("boosterfun")
-  ) {
-    setSlug = setSlug.concat("-variants");
+    setSlugs.push("promo-pack");
   }
-  return setSlug;
+  const setCodeSlugs = setCodeToSlugs[scryfallCard.set];
+  if (setCodeSlugs) {
+    for (const setCodeSlug of setCodeSlugs) {
+      setSlugs.push(setCodeSlug);
+      if (scryfallCard.promo_types?.includes("boxtopper")) {
+        setSlugs.push(setCodeSlug.concat("-box-toppers"));
+      }
+      if (
+        scryfallCard.frame_effects?.length !== 0 ||
+        scryfallCard.promo_types?.length !== 0
+      ) {
+        setSlugs.push(setCodeSlug.concat("-variants"));
+      }
+      setSlugs.push(setCodeSlug.concat("-jpn"));
+    }
+  }
+  setSlugs.push("promotional");
+  return setSlugs;
+}
+
+function getCollectorNumbers(scryfallCard: Card): string[] {
+  return [
+    ...new Set([
+      scryfallCard.collector_number,
+      ...(scryfallCard.collector_number.match(/\d+/g) ?? []),
+    ]),
+  ];
 }
 
 function getCardKingdomEntry(
   cardKingdomCatalog: CardKingdomCatalog,
   scryfallCard: Card
 ): CardKingdomEntry | null {
-  const setSlug = getSetSlug(scryfallCard);
-  if (!setSlug || !cardKingdomCatalog[setSlug]) {
-    console.warn(
-      "Error finding card in catalog: ",
-      setSlug,
-      scryfallCard.collector_number,
-      cardKingdomCatalog
+  if (!scryfallCard.games?.includes("paper")) {
+    console.log(
+      "Card is not available in paper: ",
+      scryfallCard.set,
+      scryfallCard.collector_number
+    );
+    return null;
+  }
+  if (scryfallCard.promo_types?.includes("serialized")) {
+    console.log(
+      "Card is serialized: ",
+      scryfallCard.set,
+      scryfallCard.collector_number
     );
     return null;
   }
 
-  const collectorNumber = scryfallCard.collector_number;
-  const digitGroups = collectorNumber.match(/\d+/g) ?? [];
-
-  const keysToTry = [collectorNumber, ...digitGroups];
-
+  const setSlugs = getSetSlugs(scryfallCard);
+  const collectorNumbers = getCollectorNumbers(scryfallCard);
   let entry: CardKingdomEntry | undefined;
-  for (const key of keysToTry) {
-    entry = cardKingdomCatalog[setSlug]?.[key];
-    if (entry) break;
+  for (const setSlug of setSlugs) {
+    for (const collectorNumber of collectorNumbers) {
+      entry = cardKingdomCatalog[setSlug]?.[collectorNumber];
+      if (entry) {
+        break;
+      }
+    }
+    if (entry) {
+      break;
+    }
   }
 
   if (!entry) {
     console.warn(
       "Error finding card in catalog: ",
-      setSlug,
-      keysToTry,
+      setSlugs,
+      collectorNumbers,
       cardKingdomCatalog
     );
     return null;
@@ -100,7 +125,7 @@ function createCardKingdomSvg(): SVGSVGElement {
 }
 
 async function main() {
-  setAgent("ScryKingdom", "1.0.0");
+  setAgent("ScryKingdom", "1.0.1");
 
   const cardKingdomCatalog: CardKingdomCatalog = {};
 
@@ -133,10 +158,7 @@ async function main() {
 
   const scryfallCards: Record<string, Card> = {};
   for (let i = 0; i < cardCollection.length; i++) {
-    const card = cardCollection[i];
-    if (card.games?.includes("paper")) {
-      scryfallCards[Array.from(scryfallLinks)[i]] = card;
-    }
+    scryfallCards[Array.from(scryfallLinks)[i]] = cardCollection[i];
   }
 
   const scryfallCard = scryfallCards[document.URL.split("?")[0]];
@@ -147,14 +169,13 @@ async function main() {
 
   const urls = new Set<string>();
   if (["Forest", "Island", "Mountain", "Plains", "Swamp"].includes(cardName)) {
-    const setSlugs = new Set<string>();
+    const allSetSlugs = new Set<string>();
     for (const scryfallCard of Object.values(scryfallCards)) {
-      const setSlug = getSetSlug(scryfallCard);
-      if (setSlug) {
-        setSlugs.add(setSlug);
+      for (const setSlug of getSetSlugs(scryfallCard)) {
+        allSetSlugs.add(setSlug);
       }
     }
-    for (const setSlug of setSlugs) {
+    for (const setSlug of allSetSlugs) {
       for (const searchTab of ["mtg_card", "mtg_foil"]) {
         urls.add(
           `https://www.cardkingdom.com/catalog/search?=mtg_advanced&filter[edition]=${setSlug}&filter[tab]=${searchTab}&filter[search]=mtg_advanced&filter[name]=${cardName}`
